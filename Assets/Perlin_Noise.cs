@@ -21,6 +21,10 @@ public class Perlin_Noise : MonoBehaviour
     [SerializeField] GameObject StoneTile;
     [SerializeField] GameObject SnowTile;
     [SerializeField] GameObject Tree;
+    [SerializeField] GameObject Rock;
+    [SerializeField] GameObject Grass1;
+    [SerializeField] GameObject Grass2;
+    [SerializeField] GameObject Bush;
 
     private Texture2D texture;
     private Color[] pix;
@@ -94,12 +98,33 @@ public class Perlin_Noise : MonoBehaviour
                         GameObject tree = Instantiate(Tree, new Vector3(x, height * sample + 1, y), Quaternion.identity);
                         tiles.Add(tree);
                     }
+                    else if (Random.Range(0, 1f) > 0.9)
+                    {
+                        GameObject bush = Instantiate(Bush, new Vector3(x, height * sample + 1, y), Quaternion.identity);
+                        tiles.Add(bush);
+                    }
+                    else if (Random.Range(0, 1f) > 0.9)
+                    {
+                        GameObject grass = Instantiate(Grass1, new Vector3(x, height * sample + 1, y), Quaternion.identity);
+                        tiles.Add(grass);
+                    }
+                    else if (Random.Range(0, 1f) > 0.9)
+                    {
+                        GameObject grass = Instantiate(Grass2, new Vector3(x, height * sample + 1, y), Quaternion.identity);
+                        tiles.Add(grass);
+                    }
                 }
                 else if (sample < 0.84f)
                 {
                     pix[(int)y * texture.width + (int)x] = Color.gray;
                     GameObject o = Instantiate(StoneTile, new Vector3(x, height * sample, y), Quaternion.identity);
                     tiles.Add(o);
+
+                    if (Random.Range(0, 1f) > 0.8)
+                    {
+                        GameObject rock = Instantiate(Rock, new Vector3(x, height * sample + 1, y), Quaternion.identity);
+                        tiles.Add(rock);
+                    }
                 }
                 else if (sample >= 0.84f)
                 {

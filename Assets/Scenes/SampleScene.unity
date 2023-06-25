@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028305, g: 0.22571313, b: 0.3069213, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -712,6 +712,10 @@ MonoBehaviour:
   StoneTile: {fileID: 6366532942773496920, guid: 3b0c2c32590c748acbf2dee01bb56ed8, type: 3}
   SnowTile: {fileID: 6366532942773496920, guid: 1dd8dd3c33b3a4f82a226e9f3b946692, type: 3}
   Tree: {fileID: 5423859751811064806, guid: cdb3aa98ca27f4d3f82c5f05f8ec15bb, type: 3}
+  Rock: {fileID: 5423859751811064806, guid: 9e821dc562689584996c9824caba7501, type: 3}
+  Grass1: {fileID: 5423859751811064806, guid: ee416803221dfca429ca64d37210de98, type: 3}
+  Grass2: {fileID: 5423859751811064806, guid: efeb7219cb397404e9dfa0dc1350bbec, type: 3}
+  Bush: {fileID: 5423859751811064806, guid: c0f58229246cf4d469858a5130c1a800, type: 3}
 --- !u!23 &1751798845
 MeshRenderer:
   m_ObjectHideFlags: 0
