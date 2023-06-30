@@ -1,136 +1,214 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Blocks;
 
 public class GPU_Instancer : MonoBehaviour
 {
-    public int Instances;
+    [SerializeField] public int WorldWidth;
+    [SerializeField] public int WorldLength;
+    [SerializeField] public int WorldHeight;
+    [SerializeField] public float WorldScale;
 
-    public Mesh mesh;
-    public Material[] Materials1;
+    [SerializeField] public Mesh GrassMesh;
+    [SerializeField] public Mesh DirtMesh;
+    [SerializeField] public Mesh WaterMesh;
+    [SerializeField] public Mesh SandMesh;
+    [SerializeField] public Mesh StoneMesh;
+    [SerializeField] public Mesh SnowMesh;
 
-    public Material[] Materials2;
-
-    [SerializeField] private Material _instanceMaterial;
+    [SerializeField] public Material GrassMaterial;
+    [SerializeField] public Material DirtMaterial;
+    [SerializeField] public Material WaterMaterial;
+    [SerializeField] public Material SnowMaterial;
+    [SerializeField] public Material StoneMaterial;
+    [SerializeField] public Material SandMaterial;
 
     private List<List<Matrix4x4>> GrassBatches = new List<List<Matrix4x4>>();
     private List<List<Matrix4x4>> DirtBatches = new List<List<Matrix4x4>>();
+    private List<List<Matrix4x4>> WaterBatches = new List<List<Matrix4x4>>();
+    private List<List<Matrix4x4>> SandBatches = new List<List<Matrix4x4>>();
+    private List<List<Matrix4x4>> StoneBatches = new List<List<Matrix4x4>>();
+    private List<List<Matrix4x4>> SnowBatches = new List<List<Matrix4x4>>();
 
-    private readonly uint[] _args = { 0, 0, 0, 0, 0 };
+    private BlockType[,,] _world;
 
-    private ComputeBuffer _positionBuffer1, _positionBuffer2;
-    private int _cachedMultiplier = 1;
-    
-    private ComputeBuffer _argsBuffer;
+    private int _totalBlocks;
 
+    private Perlin_Noise_Generation _perlin_generator;
 
-    private void RenderBatches(List<List<Matrix4x4>> Batch, Material[] Materials)
+    private void Update()
+    {
+        RenderBatches(GrassBatches, GrassMesh, GrassMaterial);
+        RenderBatches(DirtBatches, DirtMesh, DirtMaterial);
+        RenderBatches(WaterBatches, WaterMesh, WaterMaterial);
+        RenderBatches(SandBatches, SandMesh, SandMaterial);
+        RenderBatches(StoneBatches, StoneMesh, StoneMaterial);
+        RenderBatches(SnowBatches, SnowMesh, SnowMaterial);
+    }
+
+    private void Start()
+    {
+        _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
+
+        _world = _perlin_generator.GenerateWorld(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+
+        int grassBlocks = 0;
+        int dirtBlocks = 0;
+        int waterBlocks = 0;
+        int sandBlocks = 0;
+        int stoneBlocks = 0;
+        int snowBlocks = 0;
+
+        GrassBatches.Add(new List<Matrix4x4>());
+        DirtBatches.Add(new List<Matrix4x4>());
+        SandBatches.Add(new List<Matrix4x4>());
+        WaterBatches.Add(new List<Matrix4x4>());
+        StoneBatches.Add(new List<Matrix4x4>());
+        SnowBatches.Add(new List<Matrix4x4>());
+
+        for (int i = 0; i < WorldWidth; i++)
+        {
+            for (int j = 0; j < WorldLength; j++)
+            {
+                for (int k = 0; k < WorldHeight; k++)
+                {
+                    if (_world[i,j,k] == BlockType.GRASS)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (grassBlocks < 1000)
+                        {
+                            GrassBatches[GrassBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            grassBlocks++;
+                        }
+                        else
+                        {
+                            GrassBatches.Add(new List<Matrix4x4>());
+                            GrassBatches[GrassBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            grassBlocks = 1;
+                        }
+                    }
+                    if (_world[i, j, k] == BlockType.DIRT)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (dirtBlocks < 1000)
+                        {
+                            DirtBatches[DirtBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            dirtBlocks++;
+                        }
+                        else
+                        {
+                            DirtBatches.Add(new List<Matrix4x4>());
+                            DirtBatches[DirtBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            dirtBlocks = 1;
+                        }
+                    }
+                    if (_world[i, j, k] == BlockType.SAND)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (sandBlocks < 1000)
+                        {
+                            SandBatches[SandBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            sandBlocks++;
+                        }
+                        else
+                        {
+                            SandBatches.Add(new List<Matrix4x4>());
+                            SandBatches[SandBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            sandBlocks = 1;
+                        }
+                    }
+                    if (_world[i, j, k] == BlockType.WATER)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (waterBlocks < 1000)
+                        {
+                            WaterBatches[WaterBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            waterBlocks++;
+                        }
+                        else
+                        {
+                            WaterBatches.Add(new List<Matrix4x4>());
+                            WaterBatches[WaterBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            waterBlocks = 1;
+                        }
+                    }
+                    if (_world[i, j, k] == BlockType.STONE)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (stoneBlocks < 1000)
+                        {
+                            StoneBatches[StoneBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            stoneBlocks++;
+                        }
+                        else
+                        {
+                            StoneBatches.Add(new List<Matrix4x4>());
+                            StoneBatches[StoneBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            stoneBlocks = 1;
+                        }
+                    }
+                    if (_world[i, j, k] == BlockType.SNOW)
+                    {
+                        if (!Visible(i, j, k))
+                            continue;
+
+                        if (snowBlocks < 1000)
+                        {
+                            SnowBatches[SnowBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            snowBlocks++;
+                        }
+                        else
+                        {
+                            SnowBatches.Add(new List<Matrix4x4>());
+                            SnowBatches[SnowBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
+                            snowBlocks = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void RenderBatches(List<List<Matrix4x4>> Batch, Mesh mesh, Material material)
     {
         foreach (var batch in Batch)
         {
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
-                Graphics.DrawMeshInstanced(mesh, i, Materials[i], batch);
+                Graphics.DrawMeshInstanced(mesh, i, material, batch);
             }
         }
     }
 
-    private void Update()
+    private bool Visible(int i, int j, int k)
     {
-        Graphics.DrawMeshInstancedIndirect(mesh, 0, _instanceMaterial, new Bounds(Vector3.one, Vector3.one* 10), _argsBuffer);
-        //RenderBatches(GrassBatches, Materials1);
-        //RenderBatches(DirtBatches, Materials2);
+        if (i == 0 || i == WorldWidth - 1) return true;
+        if (j == 0 || j == WorldLength - 1) return true;
+        if (k == 0 || k == WorldHeight - 1) return true;
+
+        if (_world[i, j, k] == BlockType.WATER) return true;
+
+        if (_world[i, j, k + 1] == BlockType.AIR || _world[i, j, k - 1] == BlockType.AIR) return true;
+        if (_world[i, j + 1, k] == BlockType.AIR || _world[i, j - 1, k] == BlockType.AIR) return true;
+        if (_world[i + 1, j, k] == BlockType.AIR || _world[i - 1, j, k] == BlockType.AIR) return true;
+
+        if (_world[i, j, k + 1] == BlockType.WATER || _world[i, j, k - 1] == BlockType.WATER) return true;
+        if (_world[i, j + 1, k] == BlockType.WATER || _world[i, j - 1, k] == BlockType.WATER) return true;
+        if (_world[i + 1, j, k] == BlockType.WATER || _world[i - 1, j, k] == BlockType.WATER) return true;
+
+        return false;
     }
 
-    private void Start()
-    {
-
-        _argsBuffer = new ComputeBuffer(1, _args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-        UpdateBuffers();
-
-        // Grass Instancing
-        //int AddedMatricies = 0;
-
-        //GrassBatches.Add(new List<Matrix4x4>());
-
-        //for (int i = 0; i < Instances; i++)
-        //{
-        //    if (AddedMatricies < 1000)
-        //    {
-        //        GrassBatches[GrassBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(Random.Range(0, 50), Random.Range(0, 50), Random.Range(0, 50)), Random.rotation, Vector3.one));
-        //        AddedMatricies++;
-        //    }
-        //    else
-        //    {
-        //        GrassBatches.Add(new List<Matrix4x4>());
-        //        AddedMatricies = 0;
-        //    }
-        //}
-
-        //// Dirt Instancing
-        //AddedMatricies = 0;
-
-        //DirtBatches.Add(new List<Matrix4x4>());
-
-        //for (int i = 0; i < Instances; i++)
-        //{
-        //    if (AddedMatricies < 1000)
-        //    {
-        //        DirtBatches[DirtBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(Random.Range(0, 50), Random.Range(0, 50), Random.Range(0, 50)), Random.rotation, Vector3.one));
-        //        AddedMatricies++;
-        //    }
-        //    else
-        //    {
-        //        DirtBatches.Add(new List<Matrix4x4>());
-        //        AddedMatricies = 0;
-        //    }
-        //}
-    }
-
-    private void UpdateBuffers()
-    {
-        // Positions
-        _positionBuffer1?.Release();
-        _positionBuffer2?.Release();
-        _positionBuffer1 = new ComputeBuffer(Instances, 16);
-        _positionBuffer2 = new ComputeBuffer(Instances, 16);
-
-        var positions1 = new Vector4[Instances];
-        var positions2 = new Vector4[Instances];
-
-        // Grouping cubes into a bunch of spheres
-        var offset = Vector3.zero;
-        var batchIndex = 0;
-        var batch = 0;
-        for (var i = 0; i < Instances; i++)
-        {
-            //var dir = Random.insideUnitSphere.normalized;
-            positions1[i] = new Vector3(i,i,i);
-            positions2[i] = new Vector3(i, i, i);
-
-            positions1[i].w = i;
-            positions2[i].w = i;
-
-            //if (batchIndex++ == 250000)
-            //{
-            //    batchIndex = 0;
-            //    batch++;
-            //    offset += new Vector3(90, 0, 0);
-            //}
-        }
-
-        _positionBuffer1.SetData(positions1);
-        _positionBuffer2.SetData(positions2);
-        _instanceMaterial.SetBuffer("position_buffer_1", _positionBuffer1);
-        _instanceMaterial.SetBuffer("position_buffer_2", _positionBuffer2);
-        //_instanceMaterial.SetColorArray("color_buffer", SceneTools.Instance.ColorArray);
-
-        // Verts
-        _args[0] = mesh.GetIndexCount(0);
-        _args[1] = (uint)Instances;
-        _args[2] = mesh.GetIndexStart(0);
-        _args[3] = mesh.GetBaseVertex(0);
-
-        _argsBuffer.SetData(_args);
-    }
 }
