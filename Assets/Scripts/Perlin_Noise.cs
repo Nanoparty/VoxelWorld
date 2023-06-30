@@ -1,21 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static Blocks;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class Perlin_Noise : MonoBehaviour
 {
-    enum BlockType
-    {
-        AIR,
-        DIRT,
-        GRASS,
-        SAND,
-        WATER,
-        STONE,
-        SNOW
-    }
-
 
     [SerializeField] int pixWidth;
     [SerializeField] int pixHeight;
@@ -53,6 +46,8 @@ public class Perlin_Noise : MonoBehaviour
     private BlockType[, ,] chunk;
 
     private GameObject[,,] blocks;
+
+    public long totalBlocks = 0;
 
     private void Start()
     {
@@ -230,6 +225,8 @@ public class Perlin_Noise : MonoBehaviour
 
         //ClearHiddenBlocks();
 
+        GameObject.FindGameObjectWithTag("Blocks").GetComponent<TMP_Text>().text = "Blocks: " + tiles.Count;
+
         return;
 
         while (y < 100)
@@ -317,5 +314,65 @@ public class Perlin_Noise : MonoBehaviour
         }
         //texture.SetPixels(pix);
         //texture.Apply();
+    }
+
+    public BlockType[,,] GenerateWorld(int l, int w, int h, Vector2 offset)
+    {
+        BlockType[,,] world = new BlockType[l, w, h];
+
+        for (int i = 0; i < l; i++)
+        {
+            for (int j = 0; j < w; j++)
+            {
+                for (int k = 0; k < h; k++)
+                {
+                    world[i, j, k] = BlockType.AIR;
+                }
+            }
+        }
+
+        for (int i = 0; i < l; i++)
+        {
+            for (int j = 0; j < w; j++)
+            {
+                float sample = Mathf.PerlinNoise(offset.x + i / width * scale, offset.y + j / length * scale);
+                int maxHeight = (int)(sample * (float)height);
+
+                // Fill Surface
+                if (maxHeight < 0.3f * height)
+                {
+                    world[i, j, (int)(0.3f * height)] = BlockType.WATER;
+                    for (int k = (int)(0.3f * height) - 1; k >= maxHeight; k--)
+                    {
+                        
+                        world[i, j, k] = BlockType.WATER;
+                    }
+                }
+                else if (maxHeight < 0.4f * height)
+                {
+                    world[i, j, maxHeight] = BlockType.SAND;
+                }
+                else if (maxHeight < 0.7f * height)
+                {
+                    world[i, j, maxHeight] = BlockType.GRASS;
+                }
+                else if (maxHeight < 0.84f * height)
+                {
+                    world[i, j, maxHeight] = BlockType.STONE;
+                }
+                else if (maxHeight >= 0.84f * height)
+                {
+                    world[i, j, maxHeight] = BlockType.SNOW;
+                }
+
+                // Fill Subterrain
+                for (int k = maxHeight - 1; k >= 0; k--)
+                {
+                    world[i, j, k] = BlockType.DIRT;
+                }
+            }
+        }
+
+        return world;
     }
 }
