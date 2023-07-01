@@ -40,6 +40,25 @@ public class Standard_Instancer : MonoBehaviour
         RenderWorld();
     }
 
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            foreach (GameObject o in _tiles)
+            {
+                Destroy(o);
+            }
+            _tiles.Clear();
+
+            float random1 = Random.Range(0, 100);
+            float random2 = Random.Range(0, 100);
+            _world = _perlin_generator.GenerateWorld(new Vector2(random1, random2));
+
+            RenderWorld();
+        }
+
+    }
+
     private void RenderWorld()
     {
         for (int i = 0; i < WorldWidth; i++)

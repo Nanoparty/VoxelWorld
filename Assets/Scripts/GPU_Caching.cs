@@ -1,9 +1,14 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using static Blocks;
+using static Perlin_Noise_Generation;
 
-public class GPU_Instancer : MonoBehaviour
+public class GPU_Caching : MonoBehaviour
 {
     [SerializeField] public int WorldWidth;
     [SerializeField] public int WorldLength;
@@ -37,38 +42,95 @@ public class GPU_Instancer : MonoBehaviour
 
     private Perlin_Noise_Generation _perlin_generator;
 
-    private void Update()
-    {
-        RenderBatches(GrassBatches, GrassMesh, GrassMaterial);
-        RenderBatches(DirtBatches, DirtMesh, DirtMaterial);
-        RenderBatches(WaterBatches, WaterMesh, WaterMaterial);
-        RenderBatches(SandBatches, SandMesh, SandMaterial);
-        RenderBatches(StoneBatches, StoneMesh, StoneMaterial);
-        RenderBatches(SnowBatches, SnowMesh, SnowMaterial);
+    private WorldData data;
 
-        if (Input.GetKey(KeyCode.Space))
-        {
-            GrassBatches.Clear();
-            DirtBatches.Clear();
-            SandBatches.Clear() ;
-            WaterBatches.Clear();
-            SnowBatches.Clear();
-            StoneBatches.Clear();
+    //public int instanceCount = 10000;
+    public Mesh instanceMesh;
+    public Material instanceMaterial;
+    public int subMeshIndex = 0;
 
-            _world = _perlin_generator.GenerateWorld(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+    private int cachedInstanceCount = -1;
+    private int cachedSubMeshIndex = -1;
+    private ComputeBuffer positionBuffer;
+    private ComputeBuffer argsBuffer;
+    private uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
 
-            GenerateBatches();
-        }
-    }
-
+    
     private void Start()
     {
         _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
 
-        _world = _perlin_generator.GenerateWorld(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+        data = _perlin_generator.GenerateWorldData(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+        _world = data._world;
 
-        GenerateBatches();
+        argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        UpdateBuffers();
 
+    }
+
+    private void Update()
+    {
+        Graphics.DrawMeshInstancedIndirect(instanceMesh, subMeshIndex, instanceMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), argsBuffer);
+    }
+
+    private void UpdateBuffers()
+    {
+        if (instanceMesh != null)
+        {
+            subMeshIndex = Mathf.Clamp(subMeshIndex, 0, instanceMesh.subMeshCount - 1);
+        }
+
+        if (positionBuffer != null)
+        {
+            positionBuffer.Release();
+        }
+
+        positionBuffer = new ComputeBuffer(WorldWidth * WorldLength * WorldHeight, 16);
+        Vector4[] positions = new Vector4[WorldWidth * WorldLength * WorldHeight];
+        List<Vector4> positions2 = new List<Vector4>();
+
+        for (int pos = 0; pos < positions.Length; pos++)
+        {
+            int y = pos / (WorldWidth * WorldLength);
+
+            int z = pos / WorldWidth - (y * WorldWidth);
+
+            int x = pos % WorldWidth;
+
+
+
+            positions[pos] = new Vector4(x, y, z, 1);
+            positions2.Add(new Vector4(x, y, z, 1));
+        }
+
+        positionBuffer.SetData(positions);
+        instanceMaterial.SetBuffer("positionBuffer", positionBuffer);
+
+        if (instanceMesh != null)
+        {
+            args[0] = (uint)instanceMesh.GetIndexCount(subMeshIndex);
+            args[1] = (uint)(WorldHeight * WorldLength * WorldWidth);
+            args[2] = (uint)instanceMesh.GetIndexStart(subMeshIndex);
+            args[3] = (uint)instanceMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args[0] = args[1] = args[2] = args[3] = 0;
+        }
+        argsBuffer.SetData(args);
+        cachedInstanceCount = (WorldHeight * WorldLength * WorldWidth);
+        cachedSubMeshIndex = subMeshIndex;
+    }
+
+    void OnDisable()
+    {
+        if (positionBuffer != null)
+            positionBuffer.Release();
+        positionBuffer = null;
+
+        if (argsBuffer != null)
+            argsBuffer.Release();
+        argsBuffer = null;
     }
 
     private void GenerateBatches()

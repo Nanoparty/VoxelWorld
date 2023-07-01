@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 94006966}
-  - component: {fileID: 94006965}
+  - component: {fileID: 94006967}
   m_Layer: 0
   m_Name: MatrixTester
   m_TagString: Untagged
@@ -140,34 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &94006965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 94006964}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 759639961f9ad0c4d8b9681eb4182b79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WorldWidth: 250
-  WorldLength: 250
-  WorldHeight: 80
-  WorldScale: 5
-  GrassMesh: {fileID: 4300016, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
-  DirtMesh: {fileID: 4300008, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
-  WaterMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  SandMesh: {fileID: 4300000, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
-  StoneMesh: {fileID: 4300010, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
-  SnowMesh: {fileID: 4300000, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
-  GrassMaterial: {fileID: 2100000, guid: d447fb6253a0f8c4aa2d7549eb4003f6, type: 2}
-  DirtMaterial: {fileID: 2100000, guid: 96159f7c90956a043b05afa7ea0fd54f, type: 2}
-  WaterMaterial: {fileID: 2100000, guid: f9b7aa3d9d60b4712b4788e3247c61c3, type: 2}
-  SnowMaterial: {fileID: 2100000, guid: 5e0e6b890e3a240fda8e7fdacfa9a448, type: 2}
-  StoneMaterial: {fileID: 2100000, guid: c5fd4ca1543a01c4eab5e0cb393ab264, type: 2}
-  SandMaterial: {fileID: 2100000, guid: b43f6ddc9e448b144b831c06feedd889, type: 2}
 --- !u!4 &94006966
 Transform:
   m_ObjectHideFlags: 0
@@ -183,6 +155,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &94006967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 94006964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 473440543c6f98547b8de174e8f4eae8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WorldWidth: 3
+  WorldLength: 3
+  WorldHeight: 3
+  WorldScale: 0
+  GrassMesh: {fileID: 0}
+  DirtMesh: {fileID: 0}
+  WaterMesh: {fileID: 0}
+  SandMesh: {fileID: 0}
+  StoneMesh: {fileID: 0}
+  SnowMesh: {fileID: 0}
+  GrassMaterial: {fileID: 0}
+  DirtMaterial: {fileID: 0}
+  WaterMaterial: {fileID: 0}
+  SnowMaterial: {fileID: 0}
+  StoneMaterial: {fileID: 0}
+  SandMaterial: {fileID: 0}
+  instanceMesh: {fileID: 4300012, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  instanceMaterial: {fileID: 2100000, guid: 71ece319aff5ba1449d24780919a3611, type: 2}
+  subMeshIndex: 0
 --- !u!1 &507744674
 GameObject:
   m_ObjectHideFlags: 0
