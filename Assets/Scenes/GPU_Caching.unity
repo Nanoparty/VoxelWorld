@@ -167,22 +167,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 473440543c6f98547b8de174e8f4eae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WorldWidth: 3
-  WorldLength: 3
-  WorldHeight: 3
-  WorldScale: 0
-  GrassMesh: {fileID: 0}
-  DirtMesh: {fileID: 0}
-  WaterMesh: {fileID: 0}
-  SandMesh: {fileID: 0}
-  StoneMesh: {fileID: 0}
-  SnowMesh: {fileID: 0}
-  GrassMaterial: {fileID: 0}
-  DirtMaterial: {fileID: 0}
-  WaterMaterial: {fileID: 0}
-  SnowMaterial: {fileID: 0}
-  StoneMaterial: {fileID: 0}
-  SandMaterial: {fileID: 0}
+  WorldWidth: 100
+  WorldLength: 100
+  WorldHeight: 30
+  WorldScale: 5
+  GrassMesh: {fileID: 4300012, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  DirtMesh: {fileID: 4300008, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  WaterMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  SandMesh: {fileID: 4300000, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  StoneMesh: {fileID: 4300010, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  SnowMesh: {fileID: 4300000, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
+  GrassMaterial: {fileID: 2100000, guid: bc4a07d75bbae404abf3e5a0df31582d, type: 2}
+  DirtMaterial: {fileID: 2100000, guid: 318411ff50d10e94cb260834d4659276, type: 2}
+  WaterMaterial: {fileID: 2100000, guid: 759bec3084336e24cbe4adbc068b67dd, type: 2}
+  SnowMaterial: {fileID: 2100000, guid: 222f21b2890be5849bff0a058bf8bf00, type: 2}
+  StoneMaterial: {fileID: 2100000, guid: 745bf2b4c2dfbbe44867f8b1fb4a7e4d, type: 2}
+  SandMaterial: {fileID: 2100000, guid: 80cf6efe77057744791c6d02399124b7, type: 2}
   instanceMesh: {fileID: 4300012, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
   instanceMaterial: {fileID: 2100000, guid: 71ece319aff5ba1449d24780919a3611, type: 2}
   subMeshIndex: 0
@@ -385,7 +385,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 10000
   field of view: 60
   orthographic: 0
   orthographic size: 5

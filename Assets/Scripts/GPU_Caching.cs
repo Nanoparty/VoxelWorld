@@ -29,12 +29,19 @@ public class GPU_Caching : MonoBehaviour
     [SerializeField] public Material StoneMaterial;
     [SerializeField] public Material SandMaterial;
 
-    private List<List<Matrix4x4>> GrassBatches = new List<List<Matrix4x4>>();
-    private List<List<Matrix4x4>> DirtBatches = new List<List<Matrix4x4>>();
-    private List<List<Matrix4x4>> WaterBatches = new List<List<Matrix4x4>>();
-    private List<List<Matrix4x4>> SandBatches = new List<List<Matrix4x4>>();
-    private List<List<Matrix4x4>> StoneBatches = new List<List<Matrix4x4>>();
-    private List<List<Matrix4x4>> SnowBatches = new List<List<Matrix4x4>>();
+    private ComputeBuffer grassBuffer;
+    private ComputeBuffer dirtBuffer;
+    private ComputeBuffer waterBuffer;
+    private ComputeBuffer sandBuffer;
+    private ComputeBuffer stoneBuffer;
+    private ComputeBuffer snowBuffer;
+
+    private ComputeBuffer grassArgs;
+    private ComputeBuffer dirtArgs;
+    private ComputeBuffer waterArgs;
+    private ComputeBuffer sandArgs;
+    private ComputeBuffer stoneArgs;
+    private ComputeBuffer snowArgs;
 
     private BlockType[,,] _world;
 
@@ -44,18 +51,20 @@ public class GPU_Caching : MonoBehaviour
 
     private WorldData data;
 
-    //public int instanceCount = 10000;
     public Mesh instanceMesh;
     public Material instanceMaterial;
     public int subMeshIndex = 0;
 
     private int cachedInstanceCount = -1;
     private int cachedSubMeshIndex = -1;
-    private ComputeBuffer positionBuffer;
-    private ComputeBuffer argsBuffer;
-    private uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args1 = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args2 = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args3 = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args4 = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args5 = new uint[5] { 0, 0, 0, 0, 0 };
+    private uint[] args6 = new uint[5] { 0, 0, 0, 0, 0 };
 
-    
+
     private void Start()
     {
         _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
@@ -63,91 +72,58 @@ public class GPU_Caching : MonoBehaviour
         data = _perlin_generator.GenerateWorldData(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
         _world = data._world;
 
-        argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        grassArgs = new ComputeBuffer(1, args1.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        dirtArgs = new ComputeBuffer(1, args2.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        sandArgs = new ComputeBuffer(1, args3.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        stoneArgs = new ComputeBuffer(1, args4.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        snowArgs = new ComputeBuffer(1, args5.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        waterArgs = new ComputeBuffer(1, args6.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         UpdateBuffers();
 
     }
 
     private void Update()
     {
-        Graphics.DrawMeshInstancedIndirect(instanceMesh, subMeshIndex, instanceMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(GrassMesh, subMeshIndex, GrassMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), grassArgs);
+        Graphics.DrawMeshInstancedIndirect(DirtMesh, subMeshIndex, DirtMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), dirtArgs);
+        Graphics.DrawMeshInstancedIndirect(SandMesh, subMeshIndex, SandMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), sandArgs);
+        Graphics.DrawMeshInstancedIndirect(StoneMesh, subMeshIndex, StoneMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), stoneArgs);
+        Graphics.DrawMeshInstancedIndirect(SnowMesh, subMeshIndex, SnowMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), snowArgs);
+        Graphics.DrawMeshInstancedIndirect(WaterMesh, subMeshIndex, WaterMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), waterArgs);
     }
 
     private void UpdateBuffers()
     {
-        if (instanceMesh != null)
+        if (GrassMesh != null)
         {
-            subMeshIndex = Mathf.Clamp(subMeshIndex, 0, instanceMesh.subMeshCount - 1);
+            subMeshIndex = Mathf.Clamp(subMeshIndex, 0, GrassMesh.subMeshCount - 1);
         }
 
-        if (positionBuffer != null)
+        if (grassBuffer != null)
         {
-            positionBuffer.Release();
-        }
+            grassBuffer.Release();
+        }     
 
-        positionBuffer = new ComputeBuffer(WorldWidth * WorldLength * WorldHeight, 16);
-        Vector4[] positions = new Vector4[WorldWidth * WorldLength * WorldHeight];
-        List<Vector4> positions2 = new List<Vector4>();
+        grassBuffer = new ComputeBuffer(data.GrassCount, 16);
+        dirtBuffer = new ComputeBuffer(data.DirtCount, 16);
+        sandBuffer = new ComputeBuffer(data.SandCount, 16);
+        stoneBuffer = new ComputeBuffer(data.StoneCount, 16);
+        snowBuffer = new ComputeBuffer(data.SnowCount, 16);
+        waterBuffer = new ComputeBuffer(data.WaterCount, 16);
 
-        for (int pos = 0; pos < positions.Length; pos++)
-        {
-            int y = pos / (WorldWidth * WorldLength);
+        int grassIndex = 0;
+        int dirtIndex = 0;
+        int sandIndex = 0;
+        int snowIndex = 0;
+        int stoneIndex = 0;
+        int waterIndex = 0;
 
-            int z = pos / WorldWidth - (y * WorldWidth);
-
-            int x = pos % WorldWidth;
-
-
-
-            positions[pos] = new Vector4(x, y, z, 1);
-            positions2.Add(new Vector4(x, y, z, 1));
-        }
-
-        positionBuffer.SetData(positions);
-        instanceMaterial.SetBuffer("positionBuffer", positionBuffer);
-
-        if (instanceMesh != null)
-        {
-            args[0] = (uint)instanceMesh.GetIndexCount(subMeshIndex);
-            args[1] = (uint)(WorldHeight * WorldLength * WorldWidth);
-            args[2] = (uint)instanceMesh.GetIndexStart(subMeshIndex);
-            args[3] = (uint)instanceMesh.GetBaseVertex(subMeshIndex);
-        }
-        else
-        {
-            args[0] = args[1] = args[2] = args[3] = 0;
-        }
-        argsBuffer.SetData(args);
-        cachedInstanceCount = (WorldHeight * WorldLength * WorldWidth);
-        cachedSubMeshIndex = subMeshIndex;
-    }
-
-    void OnDisable()
-    {
-        if (positionBuffer != null)
-            positionBuffer.Release();
-        positionBuffer = null;
-
-        if (argsBuffer != null)
-            argsBuffer.Release();
-        argsBuffer = null;
-    }
-
-    private void GenerateBatches()
-    {
-        int grassBlocks = 0;
-        int dirtBlocks = 0;
-        int waterBlocks = 0;
-        int sandBlocks = 0;
-        int stoneBlocks = 0;
-        int snowBlocks = 0;
-
-        GrassBatches.Add(new List<Matrix4x4>());
-        DirtBatches.Add(new List<Matrix4x4>());
-        SandBatches.Add(new List<Matrix4x4>());
-        WaterBatches.Add(new List<Matrix4x4>());
-        StoneBatches.Add(new List<Matrix4x4>());
-        SnowBatches.Add(new List<Matrix4x4>());
+        Vector4[] grassPositions = new Vector4[data.GrassCount];
+        Vector4[] dirtPositions = new Vector4[data.DirtCount];
+        Vector4[] sandPositions = new Vector4[data.SandCount];
+        Vector4[] stonePositions = new Vector4[data.StoneCount];
+        Vector4[] snowPositions = new Vector4[data.SnowCount];
+        Vector4[] waterPositions = new Vector4[data.WaterCount];
 
         for (int i = 0; i < WorldWidth; i++)
         {
@@ -155,122 +131,163 @@ public class GPU_Caching : MonoBehaviour
             {
                 for (int k = 0; k < WorldHeight; k++)
                 {
-                    if (_world[i, j, k] == BlockType.GRASS)
+                    if (_world[i,j,k] == BlockType.GRASS)
                     {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (grassBlocks < 1000)
-                        {
-                            GrassBatches[GrassBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            grassBlocks++;
-                        }
-                        else
-                        {
-                            GrassBatches.Add(new List<Matrix4x4>());
-                            GrassBatches[GrassBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            grassBlocks = 1;
-                        }
+                        grassPositions[grassIndex] = new Vector4(i, k, j, 1);
+                        grassIndex++;
                     }
                     if (_world[i, j, k] == BlockType.DIRT)
                     {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (dirtBlocks < 1000)
-                        {
-                            DirtBatches[DirtBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            dirtBlocks++;
-                        }
-                        else
-                        {
-                            DirtBatches.Add(new List<Matrix4x4>());
-                            DirtBatches[DirtBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            dirtBlocks = 1;
-                        }
+                        dirtPositions[dirtIndex] = new Vector4(i, k, j, 1);
+                        dirtIndex++;
                     }
                     if (_world[i, j, k] == BlockType.SAND)
                     {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (sandBlocks < 1000)
-                        {
-                            SandBatches[SandBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            sandBlocks++;
-                        }
-                        else
-                        {
-                            SandBatches.Add(new List<Matrix4x4>());
-                            SandBatches[SandBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            sandBlocks = 1;
-                        }
-                    }
-                    if (_world[i, j, k] == BlockType.WATER)
-                    {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (waterBlocks < 1000)
-                        {
-                            WaterBatches[WaterBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            waterBlocks++;
-                        }
-                        else
-                        {
-                            WaterBatches.Add(new List<Matrix4x4>());
-                            WaterBatches[WaterBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            waterBlocks = 1;
-                        }
+                        sandPositions[sandIndex] = new Vector4(i, k, j, 1);
+                        sandIndex++;
                     }
                     if (_world[i, j, k] == BlockType.STONE)
                     {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (stoneBlocks < 1000)
-                        {
-                            StoneBatches[StoneBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            stoneBlocks++;
-                        }
-                        else
-                        {
-                            StoneBatches.Add(new List<Matrix4x4>());
-                            StoneBatches[StoneBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            stoneBlocks = 1;
-                        }
+                        stonePositions[stoneIndex] = new Vector4(i, k, j, 1);
+                        stoneIndex++;
                     }
                     if (_world[i, j, k] == BlockType.SNOW)
                     {
-                        if (!Visible(i, j, k))
-                            continue;
-
-                        if (snowBlocks < 1000)
-                        {
-                            SnowBatches[SnowBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            snowBlocks++;
-                        }
-                        else
-                        {
-                            SnowBatches.Add(new List<Matrix4x4>());
-                            SnowBatches[SnowBatches.Count - 1].Add(Matrix4x4.TRS(new Vector3(i, k, j), Quaternion.identity, Vector3.one));
-                            snowBlocks = 1;
-                        }
+                        snowPositions[snowIndex] = new Vector4(i, k, j, 1);
+                        snowIndex++;
+                    }
+                    if (_world[i, j, k] == BlockType.WATER)
+                    {
+                        waterPositions[waterIndex] = new Vector4(i, k, j, 1);
+                        waterIndex++;
                     }
                 }
             }
         }
+
+        //for (int pos = 0; pos < grassPositions.Length; pos++)
+        //{
+        //    int y = pos / (WorldWidth * WorldLength);
+
+        //    int z = pos / WorldWidth - (y * WorldWidth);
+
+        //    int x = pos % WorldWidth;
+
+
+
+        //    positions[pos] = new Vector4(x, y, z, 1);
+        //}
+
+        grassBuffer.SetData(grassPositions);
+        dirtBuffer.SetData(dirtPositions);
+        sandBuffer.SetData(sandPositions);
+        waterBuffer.SetData(waterPositions);
+        snowBuffer.SetData(snowPositions);
+        stoneBuffer.SetData(stonePositions);
+
+        GrassMaterial.SetBuffer("positionBuffer", grassBuffer);
+        DirtMaterial.SetBuffer("positionBuffer", dirtBuffer);
+        SandMaterial.SetBuffer("positionBuffer", sandBuffer);
+        StoneMaterial.SetBuffer("positionBuffer", stoneBuffer);
+        WaterMaterial.SetBuffer("positionBuffer", waterBuffer);
+        SnowMaterial.SetBuffer("positionBuffer", snowBuffer);
+
+        // Grass
+        if (GrassMesh != null)
+        {
+            args1[0] = (uint)GrassMesh.GetIndexCount(subMeshIndex);
+            args1[1] = (uint)(data.GrassCount);
+            args1[2] = (uint)GrassMesh.GetIndexStart(subMeshIndex);
+            args1[3] = (uint)GrassMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args1[0] = args1[1] = args1[2] = args1[3] = 0;
+        }
+        grassArgs.SetData(args1);
+
+        // Dirt
+        if (DirtMesh != null)
+        {
+            args2[0] = (uint)DirtMesh.GetIndexCount(subMeshIndex);
+            args2[1] = (uint)(data.DirtCount);
+            args2[2] = (uint)DirtMesh.GetIndexStart(subMeshIndex);
+            args2[3] = (uint)DirtMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args2[0] = args2[1] = args2[2] = args2[3] = 0;
+        }
+        dirtArgs.SetData(args2);
+
+        // Sand
+        if (SandMesh != null)
+        {
+            args3[0] = (uint)SandMesh.GetIndexCount(subMeshIndex);
+            args3[1] = (uint)(data.SandCount);
+            args3[2] = (uint)SandMesh.GetIndexStart(subMeshIndex);
+            args3[3] = (uint)SandMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args3[0] = args3[1] = args3[2] = args3[3] = 0;
+        }
+        sandArgs.SetData(args3);
+
+        // Stone
+        if (StoneMesh != null)
+        {
+            args4[0] = (uint)StoneMesh.GetIndexCount(subMeshIndex);
+            args4[1] = (uint)(data.StoneCount);
+            args4[2] = (uint)StoneMesh.GetIndexStart(subMeshIndex);
+            args4[3] = (uint)StoneMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args4[0] = args4[1] = args4[2] = args4[3] = 0;
+        }
+        stoneArgs.SetData(args4);
+
+        // Snow
+        if (SnowMesh != null)
+        {
+            args5[0] = (uint)SnowMesh.GetIndexCount(subMeshIndex);
+            args5[1] = (uint)(data.SnowCount);
+            args5[2] = (uint)SnowMesh.GetIndexStart(subMeshIndex);
+            args5[3] = (uint)SnowMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args5[0] = args5[1] = args5[2] = args5[3] = 0;
+        }snowArgs.SetData(args5);
+
+        // Water
+        if (WaterMesh != null)
+        {
+            args6[0] = (uint)WaterMesh.GetIndexCount(subMeshIndex);
+            args6[1] = (uint)(data.WaterCount);
+            args6[2] = (uint)WaterMesh.GetIndexStart(subMeshIndex);
+            args6[3] = (uint)WaterMesh.GetBaseVertex(subMeshIndex);
+        }
+        else
+        {
+            args6[0] = args6[1] = args6[2] = args6[3] = 0;
+        }
+        waterArgs.SetData(args6);
+
+        //cachedInstanceCount = (data.GrassCount);
+        //cachedSubMeshIndex = subMeshIndex;
     }
 
-    private void RenderBatches(List<List<Matrix4x4>> Batch, Mesh mesh, Material material)
+    void OnDisable()
     {
-        foreach (var batch in Batch)
-        {
-            for (int i = 0; i < mesh.subMeshCount; i++)
-            {
-                Graphics.DrawMeshInstanced(mesh, i, material, batch);
-            }
-        }
+        if (grassBuffer != null)
+            grassBuffer.Release();
+        grassBuffer = null;
+
+        if (grassArgs != null)
+            grassArgs.Release();
+        grassArgs = null;
     }
 
     private bool Visible(int i, int j, int k)
