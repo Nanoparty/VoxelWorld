@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class FPS_Counter : MonoBehaviour
 {
-    
+    public float frequency = 1;
+    float sum = 0;
+    int frames = 0;
+    float time = 0;
     void Start()
     {
         
@@ -14,6 +17,17 @@ public class FPS_Counter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GetComponent<TMP_Text>().text = "FPS: " + (1.0f / Time.deltaTime);
+        sum += (1.0f / Time.deltaTime);
+        frames++;
+        time += Time.deltaTime;
+
+        if (time >= 1)
+        {
+            GetComponent<TMP_Text>().text = "FPS: " + (sum / frames);
+            time = 0;
+            sum = 0;
+            frames = 0;
+        }
+        
     }
 }

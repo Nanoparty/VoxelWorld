@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static Blocks;
 
@@ -34,6 +35,7 @@ public class GPU_Instancer : MonoBehaviour
     private BlockType[,,] _world;
 
     private int _totalBlocks;
+    private int _renderedBlocks;
 
     private Perlin_Noise_Generation _perlin_generator;
 
@@ -48,6 +50,9 @@ public class GPU_Instancer : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space))
         {
+            _totalBlocks = 0;
+            _renderedBlocks = 0;
+
             GrassBatches.Clear();
             DirtBatches.Clear();
             SandBatches.Clear() ;
@@ -95,8 +100,12 @@ public class GPU_Instancer : MonoBehaviour
                 {
                     if (_world[i, j, k] == BlockType.GRASS)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
 
                         if (grassBlocks < 1000)
                         {
@@ -112,8 +121,13 @@ public class GPU_Instancer : MonoBehaviour
                     }
                     if (_world[i, j, k] == BlockType.DIRT)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
+
 
                         if (dirtBlocks < 1000)
                         {
@@ -129,8 +143,13 @@ public class GPU_Instancer : MonoBehaviour
                     }
                     if (_world[i, j, k] == BlockType.SAND)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
+
 
                         if (sandBlocks < 1000)
                         {
@@ -146,8 +165,13 @@ public class GPU_Instancer : MonoBehaviour
                     }
                     if (_world[i, j, k] == BlockType.WATER)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
+
 
                         if (waterBlocks < 1000)
                         {
@@ -163,8 +187,13 @@ public class GPU_Instancer : MonoBehaviour
                     }
                     if (_world[i, j, k] == BlockType.STONE)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
+
 
                         if (stoneBlocks < 1000)
                         {
@@ -180,8 +209,13 @@ public class GPU_Instancer : MonoBehaviour
                     }
                     if (_world[i, j, k] == BlockType.SNOW)
                     {
+                        _totalBlocks++;
+
                         if (!Visible(i, j, k))
                             continue;
+
+                        _renderedBlocks++;
+
 
                         if (snowBlocks < 1000)
                         {
@@ -198,6 +232,9 @@ public class GPU_Instancer : MonoBehaviour
                 }
             }
         }
+
+        GameObject.FindGameObjectWithTag("Blocks").GetComponent<TMP_Text>().text = "Blocks: " + _totalBlocks;
+        GameObject.FindGameObjectWithTag("Rendered").GetComponent<TMP_Text>().text = "Rendered: " + _renderedBlocks;
     }
 
     private void RenderBatches(List<List<Matrix4x4>> Batch, Mesh mesh, Material material)

@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using TMPro;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
@@ -46,6 +47,7 @@ public class GPU_Caching : MonoBehaviour
     private BlockType[,,] _world;
 
     private int _totalBlocks;
+    private int _renderedBlocks;
 
     private Perlin_Noise_Generation _perlin_generator;
 
@@ -72,6 +74,11 @@ public class GPU_Caching : MonoBehaviour
         data = _perlin_generator.GenerateWorldData(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
         _world = data._world;
 
+
+        _totalBlocks = data.WaterCount + data.GrassCount + data.SandCount + data.StoneCount + data.SnowCount + data.DirtCount;
+        OcclusionCulling();
+        _renderedBlocks = data.WaterCount + data.GrassCount + data.SandCount + data.StoneCount + data.SnowCount + data.DirtCount;
+
         grassArgs = new ComputeBuffer(1, args1.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         dirtArgs = new ComputeBuffer(1, args2.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         sandArgs = new ComputeBuffer(1, args3.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -84,12 +91,12 @@ public class GPU_Caching : MonoBehaviour
 
     private void Update()
     {
-        Graphics.DrawMeshInstancedIndirect(GrassMesh, subMeshIndex, GrassMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), grassArgs);
-        Graphics.DrawMeshInstancedIndirect(DirtMesh, subMeshIndex, DirtMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), dirtArgs);
-        Graphics.DrawMeshInstancedIndirect(SandMesh, subMeshIndex, SandMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), sandArgs);
-        Graphics.DrawMeshInstancedIndirect(StoneMesh, subMeshIndex, StoneMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), stoneArgs);
-        Graphics.DrawMeshInstancedIndirect(SnowMesh, subMeshIndex, SnowMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), snowArgs);
-        Graphics.DrawMeshInstancedIndirect(WaterMesh, subMeshIndex, WaterMaterial, new Bounds(Vector3.zero, new Vector3(100.0f, 100.0f, 100.0f)), waterArgs);
+        Graphics.DrawMeshInstancedIndirect(GrassMesh, subMeshIndex, GrassMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), grassArgs);
+        Graphics.DrawMeshInstancedIndirect(DirtMesh, subMeshIndex, DirtMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), dirtArgs);
+        Graphics.DrawMeshInstancedIndirect(SandMesh, subMeshIndex, SandMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), sandArgs);
+        Graphics.DrawMeshInstancedIndirect(StoneMesh, subMeshIndex, StoneMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), stoneArgs);
+        Graphics.DrawMeshInstancedIndirect(SnowMesh, subMeshIndex, SnowMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), snowArgs);
+        Graphics.DrawMeshInstancedIndirect(WaterMesh, subMeshIndex, WaterMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), waterArgs);
     }
 
     private void UpdateBuffers()
@@ -104,12 +111,12 @@ public class GPU_Caching : MonoBehaviour
             grassBuffer.Release();
         }     
 
-        grassBuffer = new ComputeBuffer(data.GrassCount, 16);
-        dirtBuffer = new ComputeBuffer(data.DirtCount, 16);
-        sandBuffer = new ComputeBuffer(data.SandCount, 16);
-        stoneBuffer = new ComputeBuffer(data.StoneCount, 16);
-        snowBuffer = new ComputeBuffer(data.SnowCount, 16);
-        waterBuffer = new ComputeBuffer(data.WaterCount, 16);
+        grassBuffer = new ComputeBuffer(Mathf.Max(data.GrassCount, 1), 16);
+        dirtBuffer = new ComputeBuffer(Mathf.Max(data.DirtCount, 1), 16);
+        sandBuffer = new ComputeBuffer(Mathf.Max(data.SandCount, 1), 16);
+        stoneBuffer = new ComputeBuffer(Mathf.Max(data.StoneCount, 1), 16);
+        snowBuffer = new ComputeBuffer(Mathf.Max(data.SnowCount, 1), 16);
+        waterBuffer = new ComputeBuffer(Mathf.Max(data.WaterCount, 1), 16);
 
         int grassIndex = 0;
         int dirtIndex = 0;
@@ -164,19 +171,6 @@ public class GPU_Caching : MonoBehaviour
                 }
             }
         }
-
-        //for (int pos = 0; pos < grassPositions.Length; pos++)
-        //{
-        //    int y = pos / (WorldWidth * WorldLength);
-
-        //    int z = pos / WorldWidth - (y * WorldWidth);
-
-        //    int x = pos % WorldWidth;
-
-
-
-        //    positions[pos] = new Vector4(x, y, z, 1);
-        //}
 
         grassBuffer.SetData(grassPositions);
         dirtBuffer.SetData(dirtPositions);
@@ -275,8 +269,8 @@ public class GPU_Caching : MonoBehaviour
         }
         waterArgs.SetData(args6);
 
-        //cachedInstanceCount = (data.GrassCount);
-        //cachedSubMeshIndex = subMeshIndex;
+        GameObject.FindGameObjectWithTag("Blocks").GetComponent<TMP_Text>().text = "Blocks: " + _totalBlocks;
+        GameObject.FindGameObjectWithTag("Rendered").GetComponent<TMP_Text>().text = "Rendered: " + _renderedBlocks;
     }
 
     void OnDisable()
@@ -285,9 +279,97 @@ public class GPU_Caching : MonoBehaviour
             grassBuffer.Release();
         grassBuffer = null;
 
+        if (dirtBuffer != null)
+            dirtBuffer.Release();
+        dirtBuffer = null;
+
+        if (sandBuffer != null)
+            sandBuffer.Release();
+        sandBuffer = null;
+
+        if (stoneBuffer != null)
+            stoneBuffer.Release();
+        stoneBuffer = null;
+
+        if (snowBuffer != null)
+            snowBuffer.Release();
+        snowBuffer = null;
+
+        if (waterBuffer != null)
+            waterBuffer.Release();
+        waterBuffer = null;
+
         if (grassArgs != null)
             grassArgs.Release();
         grassArgs = null;
+
+        if (dirtArgs != null)
+            dirtArgs.Release();
+        dirtArgs = null;
+
+        if (sandArgs != null)
+            sandArgs.Release();
+        sandArgs = null;
+
+        if (stoneArgs != null)
+            grassArgs.Release();
+        grassArgs = null;
+
+        if (snowArgs != null)
+            snowArgs.Release();
+        snowArgs = null;
+
+        if (waterArgs != null)
+            waterArgs.Release();
+        waterArgs = null;
+    }
+
+    private void OcclusionCulling()
+    {
+        BlockType[,,] _newWorld = new BlockType[WorldWidth, WorldLength, WorldHeight];
+
+        for (int i = 0; i < WorldWidth; i++)
+        {
+            for (int j = 0; j < WorldLength; j++)
+            {
+                for (int k = 0; k < WorldHeight; k++)
+                {
+                    if (!Visible(i,j,k))
+                    {
+                        if (_world[i,j,k] == BlockType.GRASS)
+                        {
+                            data.GrassCount--;
+                        }
+                        if (_world[i, j, k] == BlockType.DIRT)
+                        {
+                            data.DirtCount--;
+                        }
+                        if (_world[i, j, k] == BlockType.SAND)
+                        {
+                            data.SandCount--;
+                        }
+                        if (_world[i, j, k] == BlockType.STONE)
+                        {
+                            data.StoneCount--;
+                        }
+                        if (_world[i, j, k] == BlockType.SNOW)
+                        {
+                            data.SnowCount--;
+                        }
+                        if (_world[i, j, k] == BlockType.WATER)
+                        {
+                            data.WaterCount--;
+                        }
+                        _newWorld[i,j,k] = BlockType.AIR;
+                    }
+                    else
+                    {
+                        _newWorld[i, j, k] = _world[i, j, k];
+                    }
+                }
+            }
+        }
+        _world= _newWorld;
     }
 
     private bool Visible(int i, int j, int k)
