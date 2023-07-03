@@ -41,6 +41,29 @@ public class Controls : MonoBehaviour
 
             WorldGen.Regenerate();
         }
+        if (type == 1)
+        {
+            GPU_Instancer WorldGen = GameObject.FindGameObjectWithTag("Generator").GetComponent<GPU_Instancer>();
+
+            WorldGen.WorldWidth = w;
+            WorldGen.WorldLength = l;
+            WorldGen.WorldHeight = h;
+            WorldGen.WorldScale = s;
+
+            WorldGen.Regenerate();
+        }
+
+        if (type == 2)
+        {
+            GPU_Caching WorldGen = GameObject.FindGameObjectWithTag("Generator").GetComponent<GPU_Caching>();
+
+            WorldGen.WorldWidth = w;
+            WorldGen.WorldLength = l;
+            WorldGen.WorldHeight = h;
+            WorldGen.WorldScale = s;
+
+            WorldGen.Regenerate();
+        }
     }
 
     private void RendererListener()

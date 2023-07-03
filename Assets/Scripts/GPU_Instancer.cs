@@ -50,20 +50,27 @@ public class GPU_Instancer : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space))
         {
-            _totalBlocks = 0;
-            _renderedBlocks = 0;
-
-            GrassBatches.Clear();
-            DirtBatches.Clear();
-            SandBatches.Clear() ;
-            WaterBatches.Clear();
-            SnowBatches.Clear();
-            StoneBatches.Clear();
-
-            _world = _perlin_generator.GenerateWorld(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
-
-            GenerateBatches();
+           
         }
+    }
+
+    public void Regenerate()
+    {
+        _totalBlocks = 0;
+        _renderedBlocks = 0;
+
+        GrassBatches.Clear();
+        DirtBatches.Clear();
+        SandBatches.Clear();
+        WaterBatches.Clear();
+        SnowBatches.Clear();
+        StoneBatches.Clear();
+
+        _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
+
+        _world = _perlin_generator.GenerateWorld(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+
+        GenerateBatches();
     }
 
     private void Start()

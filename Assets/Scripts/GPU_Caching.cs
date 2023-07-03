@@ -89,6 +89,27 @@ public class GPU_Caching : MonoBehaviour
 
     }
 
+    public void Regenerate()
+    {
+        _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
+
+        data = _perlin_generator.GenerateWorldData(new Vector2(Random.Range(0, 1000), Random.Range(0, 1000)));
+        _world = data._world;
+
+
+        _totalBlocks = data.WaterCount + data.GrassCount + data.SandCount + data.StoneCount + data.SnowCount + data.DirtCount;
+        OcclusionCulling();
+        _renderedBlocks = data.WaterCount + data.GrassCount + data.SandCount + data.StoneCount + data.SnowCount + data.DirtCount;
+
+        grassArgs = new ComputeBuffer(1, args1.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        dirtArgs = new ComputeBuffer(1, args2.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        sandArgs = new ComputeBuffer(1, args3.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        stoneArgs = new ComputeBuffer(1, args4.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        snowArgs = new ComputeBuffer(1, args5.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        waterArgs = new ComputeBuffer(1, args6.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+        UpdateBuffers();
+    }
+
     private void Update()
     {
         Graphics.DrawMeshInstancedIndirect(GrassMesh, subMeshIndex, GrassMaterial, new Bounds(new Vector3(WorldWidth / 2, WorldHeight / 2, WorldLength / 2), new Vector3(WorldWidth, WorldHeight, WorldLength)), grassArgs);
