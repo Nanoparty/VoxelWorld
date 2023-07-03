@@ -13,6 +13,7 @@ public class Standard_Instancer : MonoBehaviour
     [SerializeField] public int WorldWidth;
     [SerializeField] public int WorldHeight;
     [SerializeField] public float WorldScale;
+    [SerializeField] public bool Foliage;
 
     [SerializeField] GameObject DirtTile;
     [SerializeField] GameObject StoneTile;
@@ -20,6 +21,12 @@ public class Standard_Instancer : MonoBehaviour
     [SerializeField] GameObject GrassTile;
     [SerializeField] GameObject WaterTile;
     [SerializeField] GameObject SandTile;
+
+    [SerializeField] GameObject Tree;
+    [SerializeField] GameObject Bush;
+    [SerializeField] GameObject Grass1;
+    [SerializeField] GameObject Grass2;
+    [SerializeField] GameObject Rock;
 
     private BlockType[,,] _world;
 
@@ -83,6 +90,30 @@ public class Standard_Instancer : MonoBehaviour
 
                         GameObject tile = Instantiate(GrassTile, new Vector3(i, k, j), Quaternion.identity);
                         _tiles.Add(tile);
+
+                        if (!Foliage)
+                            continue;
+
+                        if (Random.Range(0, 1f) > 0.8)
+                        {
+                            GameObject tree = Instantiate(Tree, new Vector3(i, k, j), Quaternion.identity);
+                            _tiles.Add(tree);
+                        }
+                        else if (Random.Range(0, 1f) > 0.9)
+                        {
+                            GameObject bush = Instantiate(Bush, new Vector3(i, k, j), Quaternion.identity);
+                            _tiles.Add(bush);
+                        }
+                        else if (Random.Range(0, 1f) > 0.9)
+                        {
+                            GameObject grass = Instantiate(Grass1, new Vector3(i, k, j), Quaternion.identity);
+                            _tiles.Add(grass);
+                        }
+                        else if (Random.Range(0, 1f) > 0.9)
+                        {
+                            GameObject grass = Instantiate(Grass2, new Vector3(i, k, j), Quaternion.identity);
+                            _tiles.Add(grass);
+                        }
                     }
                     if (_world[i,j,k] == BlockType.STONE)
                     {
@@ -91,6 +122,15 @@ public class Standard_Instancer : MonoBehaviour
 
                         GameObject tile = Instantiate(StoneTile, new Vector3(i, k, j), Quaternion.identity);
                         _tiles.Add(tile);
+
+                        if (!Foliage)
+                            continue;
+
+                        if (Random.Range(0, 1f) > 0.8 && k > 0)
+                        {
+                            GameObject rock = Instantiate(Rock, new Vector3(i, k, j), Quaternion.identity);
+                            _tiles.Add(rock);
+                        }
                     }
                     if (_world[i, j, k] == BlockType.SAND)
                     {
@@ -138,15 +178,18 @@ public class Standard_Instancer : MonoBehaviour
         if (j == 0 || j == WorldLength - 1) return true;
         if (k == 0 || k == WorldHeight - 1) return true;
 
-        if (_world[i, j, k] == BlockType.WATER) return true;
+        //if (_world[i, j, k] == BlockType.WATER) return true;
 
         if (_world[i, j, k + 1] == BlockType.AIR || _world[i, j, k - 1] == BlockType.AIR) return true;
         if (_world[i, j + 1, k] == BlockType.AIR || _world[i, j - 1, k] == BlockType.AIR) return true;
         if (_world[i + 1, j, k] == BlockType.AIR || _world[i - 1, j, k] == BlockType.AIR) return true;
 
-        if (_world[i, j, k + 1] == BlockType.WATER || _world[i, j, k - 1] == BlockType.WATER) return true;
-        if (_world[i, j + 1, k] == BlockType.WATER || _world[i, j - 1, k] == BlockType.WATER) return true;
-        if (_world[i + 1, j, k] == BlockType.WATER || _world[i - 1, j, k] == BlockType.WATER) return true;
+        if (_world[i, j, k] != BlockType.WATER)
+        {
+            if (_world[i, j, k + 1] == BlockType.WATER || _world[i, j, k - 1] == BlockType.WATER) return true;
+            if (_world[i, j + 1, k] == BlockType.WATER || _world[i, j - 1, k] == BlockType.WATER) return true;
+            if (_world[i + 1, j, k] == BlockType.WATER || _world[i - 1, j, k] == BlockType.WATER) return true;
+        }
 
         return false;
     }

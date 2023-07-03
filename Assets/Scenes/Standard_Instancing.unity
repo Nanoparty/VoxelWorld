@@ -3801,12 +3801,18 @@ MonoBehaviour:
   WorldWidth: 100
   WorldHeight: 30
   WorldScale: 5
+  Decorations: 1
   DirtTile: {fileID: 1960483894002118, guid: c291e80b4e3bd6940a732e6027a8d72b, type: 3}
   StoneTile: {fileID: 6366532942773496920, guid: 3b0c2c32590c748acbf2dee01bb56ed8, type: 3}
   SnowTile: {fileID: 6366532942773496920, guid: 1dd8dd3c33b3a4f82a226e9f3b946692, type: 3}
   GrassTile: {fileID: 6366532942773496920, guid: 9fcf93350dc56446a956c04448b8ca1d, type: 3}
   WaterTile: {fileID: 6366532942773496920, guid: 85c9fb56ddf93420a924304d9667e184, type: 3}
   SandTile: {fileID: 6366532942773496920, guid: 62b39efa57a254cdc9630742f35162db, type: 3}
+  Tree: {fileID: 1526499860666122, guid: 5587fba3f225b704e95e68bc89400b0d, type: 3}
+  Bush: {fileID: 1113076209815798, guid: d7e0f922451abfe4cb038c5c06dee0ed, type: 3}
+  Grass1: {fileID: 1683952557503880, guid: 16c1692a49faae54ebc8fc06f8ccd48b, type: 3}
+  Grass2: {fileID: 1315530989194058, guid: 6bdb6b60f40a22f4b97ff1462b47c30d, type: 3}
+  Rock: {fileID: 1663958853142840, guid: fed9fcfeed61c474a90852b220d1185e, type: 3}
 --- !u!4 &1013946659
 Transform:
   m_ObjectHideFlags: 0

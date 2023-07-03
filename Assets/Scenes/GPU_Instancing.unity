@@ -469,6 +469,9 @@ MonoBehaviour:
   WorldLength: 100
   WorldHeight: 30
   WorldScale: 5
+  Foliage: 1
+  treeScale: 2
+  treeOffset: {x: 0, y: -0.5, z: 0}
   GrassMesh: {fileID: 4300016, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
   DirtMesh: {fileID: 4300008, guid: 1756dbd695eea5345bf74a83d3c1e523, type: 3}
   WaterMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
@@ -481,6 +484,16 @@ MonoBehaviour:
   SnowMaterial: {fileID: 2100000, guid: 5e0e6b890e3a240fda8e7fdacfa9a448, type: 2}
   StoneMaterial: {fileID: 2100000, guid: c5fd4ca1543a01c4eab5e0cb393ab264, type: 2}
   SandMaterial: {fileID: 2100000, guid: b43f6ddc9e448b144b831c06feedd889, type: 2}
+  TreeMesh: {fileID: 4300000, guid: fdf4ecd4e2eb6284fae0d2b753ec42b1, type: 3}
+  TreeMaterial: {fileID: 2100000, guid: 0b818849cea65db48ac03ce9c91c087d, type: 2}
+  BushMesh: {fileID: 4300008, guid: fdf4ecd4e2eb6284fae0d2b753ec42b1, type: 3}
+  BushMaterial: {fileID: 2100000, guid: 0b818849cea65db48ac03ce9c91c087d, type: 2}
+  Grass1Mesh: {fileID: 0}
+  Grass1Material: {fileID: 0}
+  Grass2Mesh: {fileID: 0}
+  Grass2Material: {fileID: 0}
+  RockMesh: {fileID: 4300002, guid: fdf4ecd4e2eb6284fae0d2b753ec42b1, type: 3}
+  RockMaterial: {fileID: 2100000, guid: 0b818849cea65db48ac03ce9c91c087d, type: 2}
 --- !u!4 &94006966
 Transform:
   m_ObjectHideFlags: 0
