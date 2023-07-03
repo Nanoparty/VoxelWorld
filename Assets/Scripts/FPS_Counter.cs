@@ -23,7 +23,7 @@ public class FPS_Counter : MonoBehaviour
 
         if (time >= 1)
         {
-            GetComponent<TMP_Text>().text = "FPS: " + (sum / frames);
+            GetComponent<TMP_Text>().text = "FPS: " + (int)(sum / frames);
             time = 0;
             sum = 0;
             frames = 0;

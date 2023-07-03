@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Blocks
   - Rendered
+  - Generator
   layers:
   - Default
   - TransparentFX

@@ -312,7 +312,7 @@ public class GPU_Caching : MonoBehaviour
         sandArgs = null;
 
         if (stoneArgs != null)
-            grassArgs.Release();
+            stoneArgs.Release();
         grassArgs = null;
 
         if (snowArgs != null)

@@ -72,9 +72,17 @@ public class Perlin_Noise_Generation
                 }
 
                 // Fill Subterrain
+                int stoneLevel = maxHeight - 5;
                 for (int k = maxHeight - 1; k >= 0; k--)
                 {
-                    world[i, j, k] = BlockType.DIRT;
+                    if (k <= stoneLevel)
+                    {
+                        world[i, j, k] = BlockType.STONE;
+                    }
+                    else
+                    {
+                        world[i, j, k] = BlockType.DIRT;
+                    }
                 }
             }
         }
@@ -145,10 +153,19 @@ public class Perlin_Noise_Generation
                 }
 
                 // Fill Subterrain
+                int stoneLevel = maxHeight - 5;
                 for (int k = maxHeight - 1; k >= 0; k--)
                 {
-                    world[i, j, k] = BlockType.DIRT;
-                    dirt++;
+                    if (k <= stoneLevel)
+                    {
+                        world[i, j, k] = BlockType.STONE;
+                        stone++;
+                    }
+                    else
+                    {
+                        world[i, j, k] = BlockType.DIRT;
+                        dirt++;
+                    }
                 }
             }
         }

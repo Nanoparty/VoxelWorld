@@ -9,10 +9,10 @@ using static Blocks;
 
 public class Standard_Instancer : MonoBehaviour
 {
-    [SerializeField] int WorldLength;
-    [SerializeField] int WorldWidth;
-    [SerializeField] int WorldHeight;
-    [SerializeField] float WorldScale;
+    [SerializeField] public int WorldLength;
+    [SerializeField] public int WorldWidth;
+    [SerializeField] public int WorldHeight;
+    [SerializeField] public float WorldScale;
 
     [SerializeField] GameObject DirtTile;
     [SerializeField] GameObject StoneTile;
@@ -44,19 +44,28 @@ public class Standard_Instancer : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            foreach (GameObject o in _tiles)
-            {
-                Destroy(o);
-            }
-            _tiles.Clear();
-
-            float random1 = Random.Range(0, 100);
-            float random2 = Random.Range(0, 100);
-            _world = _perlin_generator.GenerateWorld(new Vector2(random1, random2));
-
-            RenderWorld();
+            
         }
 
+    }
+
+    public void Regenerate()
+    {
+        _totalBlocks = 0;
+
+        foreach (GameObject o in _tiles)
+        {
+            Destroy(o);
+        }
+        _tiles.Clear();
+
+        _perlin_generator = new Perlin_Noise_Generation(WorldWidth, WorldLength, WorldHeight, WorldScale);
+
+        float random1 = Random.Range(0, 100);
+        float random2 = Random.Range(0, 100);
+        _world = _perlin_generator.GenerateWorld(new Vector2(random1, random2));
+
+        RenderWorld();
     }
 
     private void RenderWorld()
