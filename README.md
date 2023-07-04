@@ -6,8 +6,9 @@ A project dedicated to experimental voxel world generation with random noise alg
 Download the application for free on Windows, Mac and Linux from: 
 
 <p align="center">
-  <img src="Screenshots/CoverImage.png" />
-  <img src="Screenshots/Screenshot1.png" />
+  <img src="Screenshots/1.png" />
+  <img src="Screenshots/2.png" />
+  <img src="Screenshots/3.png" />
 </p>
 
 ## Features
