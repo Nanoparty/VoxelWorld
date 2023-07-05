@@ -1,13 +1,18 @@
 # Voxel World
+
+![version](https://img.shields.io/badge/Version-1.0-green)
+![engine](https://img.shields.io/badge/Engine-Unity-blue)
+
 A project dedicated to experimental voxel world generation with random noise algorithms. This project was made in Unity. This project has had all paid assets removed.
 
 ## Play Now
 
-Download the application for free on Windows, Mac and Linux from: 
+Download the application for free on Windows, Mac and Linux from: https://dispixel.itch.io/voxel-world
 
 <p align="center">
-  <img src="Screenshots/CoverImage.png" />
-  <img src="Screenshots/Screenshot1.png" />
+  <img src="Screenshots/1.png" />
+  <img src="Screenshots/2.png" />
+  <img src="Screenshots/3.png" />
 </p>
 
 ## Features
@@ -29,3 +34,5 @@ Generate worlds with a mixture of different random noise algorithms and paramete
 This project uses the following paid assets:
 
 - [Cube World](https://assetstore.unity.com/packages/3d/environments/fantasy/cube-world-115613)
+
+© Nathan Foote | 2023
