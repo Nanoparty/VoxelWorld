@@ -10,6 +10,7 @@ A project dedicated to experimental voxel world generation with random noise alg
 Download the application for free on Windows, Mac and Linux from: https://dispixel.itch.io/voxel-world
 
 <p align="center">
+  <img src="Screenshots/Voxel_Promo.png" />
   <img src="Screenshots/1.png" />
   <img src="Screenshots/2.png" />
   <img src="Screenshots/3.png" />
