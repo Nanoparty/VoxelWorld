@@ -1,4 +1,8 @@
 # Voxel World
+
+![version](https://img.shields.io/badge/Version-1.0-green)
+![engine](https://img.shields.io/badge/Engine-Unity-blue)
+
 A project dedicated to experimental voxel world generation with random noise algorithms. This project was made in Unity. This project has had all paid assets removed.
 
 ## Play Now
