@@ -34,3 +34,5 @@ Generate worlds with a mixture of different random noise algorithms and paramete
 This project uses the following paid assets:
 
 - [Cube World](https://assetstore.unity.com/packages/3d/environments/fantasy/cube-world-115613)
+
+© Nathan Foote | 2023
