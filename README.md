@@ -7,7 +7,7 @@ A project dedicated to experimental voxel world generation with random noise alg
 
 ## Play Now
 
-Download the application for free on Windows, Mac and Linux from: 
+Download the application for free on Windows, Mac and Linux from: https://dispixel.itch.io/voxel-world
 
 <p align="center">
   <img src="Screenshots/1.png" />
